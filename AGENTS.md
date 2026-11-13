@@ -28,3 +28,7 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Application architecture
+- Keep menu management mutations in TanStack server functions behind the encrypted manager session, while public menu reads follow the database's public read policy; this keeps the shared manager password and privileged edits out of browser code.
+- Persist the public menu and store contact settings in Lovable Cloud, while keeping the customer cart as browser-local checkout state; this lets menu edits persist without requiring customer accounts.
