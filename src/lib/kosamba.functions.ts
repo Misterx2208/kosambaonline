@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { useSession } from "@tanstack/react-start/server";
+import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
-import type { Tables } from "@/integrations/supabase/types";
+import type { Database, Tables } from "@/integrations/supabase/types";
 
 type MenuItem = Tables<"menu_items">;
 
@@ -48,6 +49,33 @@ const menuItemUpdateSchema = menuItemSchema.extend({ id: z.string().uuid() });
 const idSchema = z.object({ id: z.string().uuid() });
 const settingsSchema = z.object({
   whatsappNumber: z.string().trim().regex(/^(?:\+?\d{7,15})?$/),
+});
+
+export const getPublicMenu = createServerFn({ method: "GET" }).handler(async () => {
+  const url = process.env["SUPABASE_URL"];
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!url || !key) throw new Error("Online Kosamba menu is not configured.");
+
+  const supabasePublic = createClient<Database>(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: {
+      fetch: (input, init) => {
+        const headers = new Headers(init?.headers);
+        if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) {
+          headers.delete("Authorization");
+        }
+        headers.set("apikey", key);
+        return fetch(input, { ...init, headers });
+      },
+    },
+  });
+  const [{ data: items, error: itemError }, { data: settings, error: settingsError }] =
+    await Promise.all([
+      supabasePublic.from("menu_items").select("*").eq("enabled", true).order("category").order("name"),
+      supabasePublic.from("store_settings").select("whatsapp_number").eq("id", "main").maybeSingle(),
+    ]);
+  if (itemError || settingsError) throw new Error("Could not load the breakfast menu.");
+  return { items: (items ?? []) as MenuItem[], whatsappNumber: settings?.whatsapp_number ?? "" };
 });
 
 export const unlockManager = createServerFn({ method: "POST" })
