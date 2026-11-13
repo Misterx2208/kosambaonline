@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import type { Database, Tables } from "@/integrations/supabase/types";
+import { managerPasswordMatches } from "@/lib/kosamba-security";
 
 type MenuItem = Tables<"menu_items">;
 
@@ -20,21 +21,6 @@ function getSessionConfig() {
 
 async function managerSession() {
   return useSession<{ unlocked?: boolean }>(getSessionConfig());
-}
-
-async function passwordMatches(input: string, expected: string) {
-  const encoder = new TextEncoder();
-  const [inputHash, expectedHash] = await Promise.all([
-    crypto.subtle.digest("SHA-256", encoder.encode(input)),
-    crypto.subtle.digest("SHA-256", encoder.encode(expected)),
-  ]);
-  const inputBytes = new Uint8Array(inputHash);
-  const expectedBytes = new Uint8Array(expectedHash);
-  let difference = 0;
-  for (let index = 0; index < inputBytes.length; index += 1) {
-    difference |= (inputBytes[index] ?? 0) ^ (expectedBytes[index] ?? 0);
-  }
-  return difference === 0;
 }
 
 const menuItemSchema = z.object({
@@ -82,7 +68,7 @@ export const unlockManager = createServerFn({ method: "POST" })
   .inputValidator((input: { password: string }) => z.object({ password: z.string().max(128) }).parse(input))
   .handler(async ({ data }) => {
     const expected = process.env["SITE_PASSWORD"];
-    if (!expected || !(await passwordMatches(data.password, expected))) {
+    if (!expected || !(await managerPasswordMatches(data.password, expected))) {
       return { ok: false as const };
     }
     const session = await managerSession();
