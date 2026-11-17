@@ -64,19 +64,45 @@ function ManagerPage() {
   }
 
   useEffect(() => {
-    void refresh().catch(() => setChecking(false));
-  }, []);
+    let active = true;
+    void readData()
+      .then((result) => {
+        if (!active) return;
+        setAuthorized(result.authorized);
+        if (result.authorized) {
+          setItems(result.items);
+          setNumber(result.whatsappNumber);
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        setMessage("Could not check manager access. Please try again.");
+      })
+      .finally(() => {
+        if (active) setChecking(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [readData]);
 
   async function handleUnlock(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoginError(false);
-    const result = await unlock({ data: { password } });
-    if (!result.ok) {
-      setLoginError(true);
-      return;
+    setSaving(true);
+    try {
+      const result = await unlock({ data: { password } });
+      if (!result.ok) {
+        setLoginError(true);
+        return;
+      }
+      setPassword("");
+      await refresh();
+    } catch {
+      setMessage("Could not unlock manager. Check your connection and try again.");
+    } finally {
+      setSaving(false);
     }
-    setPassword("");
-    await refresh();
   }
 
   async function handleAdd(event: React.FormEvent<HTMLFormElement>) {
@@ -149,7 +175,8 @@ function ManagerPage() {
           <label className="block text-sm font-medium" htmlFor="manager-password">Password</label>
           <Input id="manager-password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} maxLength={128} required />
           {loginError && <p role="alert" className="text-sm text-destructive">That password did not match. Please try again.</p>}
-          <Button type="submit" className="w-full">Unlock manager <LockKeyhole /></Button>
+          <Button type="submit" className="w-full" disabled={saving}>{saving ? "Checking…" : "Unlock manager"} <LockKeyhole /></Button>
+          {message && <p role="status" className="text-sm text-destructive">{message}</p>}
         </form>
       </section>
     </main>
