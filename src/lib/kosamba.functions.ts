@@ -15,7 +15,9 @@ function getSessionConfig() {
     password,
     name: "kosamba-manager",
     maxAge: 60 * 60 * 12,
-    cookie: { httpOnly: true, secure: true, sameSite: "lax" as const, path: "/" },
+    // The editor preview embeds the site on a different origin. Partitioning
+    // this encrypted cookie lets the unlock state survive the follow-up RPC.
+    cookie: { httpOnly: true, secure: true, sameSite: "none" as const, partitioned: true, path: "/" },
   };
 }
 
