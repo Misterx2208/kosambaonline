@@ -105,8 +105,8 @@ function Index() {
         <section className="grid items-center gap-8 pb-14 pt-9 md:grid-cols-[1.02fr_0.98fr] md:gap-12 md:pb-20 md:pt-12">
           <div className="order-2 md:order-1">
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Fresh mornings, Kosamba style</p>
-            <h1 className="max-w-xl font-display text-5xl font-bold leading-[1.02] sm:text-6xl">A better morning starts <span className="text-primary">here.</span></h1>
-            <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">Warm, filling breakfast favourites made for your morning. Choose what you love and order in a few taps.</p>
+            <h1 className="max-w-xl font-display text-5xl font-bold leading-[1.02] sm:text-6xl">Only <span className="text-primary">Breakfast</span></h1>
+            <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">Home delivery 8:00 AM to 10:00 AM.</p>
             <a href="#menu" className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-primary">Explore the menu <ArrowRight className="size-4" /></a>
           </div>
           <div className="order-1 overflow-hidden rounded-2xl bg-secondary md:order-2">
