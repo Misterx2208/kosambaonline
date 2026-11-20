@@ -10,6 +10,7 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type MenuItem = Tables<"menu_items">;
 type Cart = Record<string, number>;
+const ALL_ITEMS_CATEGORY = "__all_items__";
 
 // The home route ships no og:image, so serve-time hosting can inject the
 // project's social preview (explicit og:image or latest screenshot).
@@ -36,9 +37,13 @@ function Index() {
   const [orderNote, setOrderNote] = useState("");
   const visibleItems = items as MenuItem[];
   const categories = useMemo(() => [...new Set(visibleItems.map((item) => item.category))], [visibleItems]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const currentCategory = categories.includes(selectedCategory) ? selectedCategory : categories[0] ?? "";
-  const categoryItems = visibleItems.filter((item) => item.category === currentCategory);
+  const [selectedCategory, setSelectedCategory] = useState(ALL_ITEMS_CATEGORY);
+  const currentCategory = selectedCategory === ALL_ITEMS_CATEGORY || !categories.includes(selectedCategory)
+    ? ALL_ITEMS_CATEGORY
+    : selectedCategory;
+  const categoryItems = currentCategory === ALL_ITEMS_CATEGORY
+    ? visibleItems
+    : visibleItems.filter((item) => item.category === currentCategory);
   const cartItems = visibleItems.filter((item) => (cart[item.id] ?? 0) > 0);
   const itemCount = Object.values(cart).reduce((sum, count) => sum + count, 0);
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * (cart[item.id] ?? 0), 0);
@@ -112,7 +117,7 @@ function Index() {
         <section id="menu" className="border-t border-border pb-24 pt-10">
           <div className="flex flex-wrap items-end justify-between gap-5">
             <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Made for your morning</p><h2 className="mt-2 font-display text-3xl font-bold">Breakfast menu</h2></div>
-            {categories.length > 0 && <div className="flex max-w-full gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Breakfast categories">{categories.map((category) => <button key={category} role="tab" aria-selected={currentCategory === category} onClick={() => setSelectedCategory(category)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${currentCategory === category ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-accent"}`}>{category}</button>)}</div>}
+            {categories.length > 0 && <div className="flex max-w-full gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Breakfast categories"><button role="tab" aria-selected={currentCategory === ALL_ITEMS_CATEGORY} onClick={() => setSelectedCategory(ALL_ITEMS_CATEGORY)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${currentCategory === ALL_ITEMS_CATEGORY ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-accent"}`}>All items</button>{categories.map((category) => <button key={category} role="tab" aria-selected={currentCategory === category} onClick={() => setSelectedCategory(category)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${currentCategory === category ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-accent"}`}>{category}</button>)}</div>}
           </div>
           {categoryItems.length > 0 ? <div className="mt-7 grid gap-x-8 sm:grid-cols-2 lg:grid-cols-3">{categoryItems.map((item) => <article key={item.id} className="flex min-h-32 items-center justify-between gap-4 border-b border-border py-5"><div className="min-w-0"><h3 className="font-display text-lg font-semibold">{item.name}</h3><p className="mt-1 line-clamp-2 text-sm leading-6 text-muted-foreground">{item.description}</p><p className="mt-2 text-sm font-semibold">₹{item.price.toFixed(2)}</p></div><div className="flex shrink-0 items-center gap-2">{(cart[item.id] ?? 0) > 0 && <><Button size="icon" variant="outline" aria-label={`Remove one ${item.name}`} onClick={() => changeQuantity(item.id, -1)}><Minus /></Button><span className="min-w-5 text-center text-sm font-semibold">{cart[item.id]}</span></>}<Button size="icon" variant={(cart[item.id] ?? 0) > 0 ? "secondary" : "default"} aria-label={`Add ${item.name} to basket`} onClick={() => changeQuantity(item.id, 1)}><Plus /></Button></div></article>)}</div> : <div className="py-14 text-center text-muted-foreground">The menu is being prepared. Check back soon.</div>}
         </section>
