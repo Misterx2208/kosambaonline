@@ -1,14 +1,18 @@
-# Welcome to your Lovable project
+# Kosambaonline
+
+Create a website name online kosamba in which lists all breakfast items and create a admin page which unlock all editing after entering 2208 password which includes adding removing items ,price,enable disable , also give check out page and add  whatsapp direct link after clicking on checkout. WhatsApp number should be editable from manager menu
 
 This project was built with [Lovable](https://lovable.dev).
 
+**Live app**: https://kosambaonline.lovable.app
+
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/a656570c-0d1a-43e0-bdb1-fa3c361fd031).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +24,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
