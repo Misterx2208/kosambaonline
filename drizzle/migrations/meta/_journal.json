@@ -8,6 +8,13 @@
       "when": 1794562618870,
       "tag": "0000_kosamba_menu_and_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795396466874,
+      "tag": "0001_limit_public_store_settings_read",
+      "breakpoints": true
     }
   ]
 }
